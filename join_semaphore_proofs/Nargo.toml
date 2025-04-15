@@ -1,0 +1,4 @@
+[package]
+name = "join_semaphore_proofs"
+type = "bin"
+authors = [""]
