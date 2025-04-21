@@ -29,10 +29,24 @@ These are the steps:
 3. Generate Aggregation proof using the data from step 1 & 2
 4. Verify Aggregation proof
 
-When running this flow directly with `bb` it works! 
-When running the flow with the js script, it gives an error (see below). 
+This flow works using `bb cli`; it doesn't work using `bb.js`. This is probably due to wasm memory limit since we are dealing with a large circuit ([reference](https://discord.com/channels/1113924620781883405/1209885496256503888/1309181119559893103) to Discord comment about this). More details about the error below. 
 
-## Steps with `nargo` and `bb`
+You can either follow the manual steps below or run the entire process using the provided script.
+
+## Run the full flow with `bb cli`
+
+To skip the manual steps, you can run the full proof generation and aggregation flow using the following script:
+
+```bash
+node prove_bb_cli.js
+```
+This script:
+
+1. Generates two Semaphore proofs (depth 2 and depth 10) for hardcoded testdata
+2. Aggregates them using the join_semaphore_proofs circuit
+3. Verifies the final aggregated proof
+
+## Manual steps with `nargo` and `bb`
 Versions: `bb 0.82.2` and `nargo 1.0.0-beta.3`.
 
 These steps detail exactly how to generate 2 Semaphore proofs and then generate an aggregation proof. The `semaphore` folder contains the [Semaphore Noir circuit,](https://github.com/hashcloak/semaphore-noir/blob/noir-support/packages/circuits-noir/src/main.nr) as well as 2 filled out `Prover.toml`s with vaid testdata. 
@@ -108,4 +122,6 @@ Error [RuntimeError]: unreachable
 Node.js v18.20.4
 ```
 
-This error doesn't occur when the recursion circuit only contains a single verification (but all the same inputs). Maybe the circuit is too deep for wasm?
+This error doesn't occur when the recursion circuit only contains a single verification (but all the same inputs). 
+
+It seems like the circuitsize might be too large and hit the wasm memory limit. This is a [comment](https://discord.com/channels/1113924620781883405/1209885496256503888/1309181119559893103) we read in the Noir Discord. 
