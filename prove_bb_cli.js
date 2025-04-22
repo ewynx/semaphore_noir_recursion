@@ -77,17 +77,31 @@ async function prove_UltraHonk_CLI() {
     "--output_format", "bytes_and_fields",
     "--honk_recursion", "1",
     "--recursive",
-    "--init_kzg_accumulator"
+    "--init_kzg_accumulator",
+    "--oracle_hash",
+    "keccak"    
   ]);
 
   runBB([
     "write_vk", "-v",
-    "-s", "ultra_honk",
+    "--scheme", "ultra_honk",
     "-b", "./semaphore/target/semaphore.json",
     "-o", out1,
     "--output_format", "bytes_and_fields",
     "--honk_recursion", "1",
-    "--init_kzg_accumulator"
+    "--init_kzg_accumulator",
+    "--oracle_hash",
+    "keccak"
+  ]);
+
+  // Extra check in between
+  runBB([
+    "verify",
+    "--scheme", "ultra_honk",
+    "-k", `${out1}/vk`,
+    "-p", `${out1}/proof`,
+    "--oracle_hash",
+    "keccak"
   ]);
 
   const proofFields1 = JSON.parse(readFileSync(`${out1}/proof_fields.json`));
@@ -110,7 +124,19 @@ async function prove_UltraHonk_CLI() {
     "--output_format", "bytes_and_fields",
     "--honk_recursion", "1",
     "--recursive",
-    "--init_kzg_accumulator"
+    "--init_kzg_accumulator",
+    "--oracle_hash",
+    "keccak"
+  ]);
+
+  // Extra check in between
+  runBB([
+    "verify",
+    "--scheme", "ultra_honk",
+    "-k", `${out1}/vk`,
+    "-p", `${out2}/proof`,
+    "--oracle_hash",
+    "keccak"
   ]);
 
   const proofFields2 = JSON.parse(readFileSync(`${out2}/proof_fields.json`));
@@ -142,23 +168,31 @@ async function prove_UltraHonk_CLI() {
   // Proving must be done with bb cli; the circuit is too large for bb.js
   runBB([
     "prove", "-v",
+    "--scheme", "ultra_honk",
     "-b", "./join_semaphore_proofs/target/join_semaphore_proofs.json",
     "-w", `${outJoin}/witness_join.gz`,
     "-o", outJoin,
-    "--recursive"
+    "--oracle_hash",
+    "keccak"
   ]);
 
   runBB([
     "write_vk", "-v",
+    "--scheme", "ultra_honk",
     "-b", "./join_semaphore_proofs/target/join_semaphore_proofs.json",
     "-o", outJoin,
-    "--honk_recursion", "1"
+    "--honk_recursion", "1",
+    "--oracle_hash",
+    "keccak"
   ]);
 
   runBB([
     "verify",
+    "--scheme", "ultra_honk",
     "-k", `${outJoin}/vk`,
-    "-p", `${outJoin}/proof`
+    "-p", `${outJoin}/proof`,
+    "--oracle_hash",
+    "keccak"
   ]);
 
   console.log("ˆˆˆˆˆˆˆRecursive proof verified successfullyˆˆˆˆˆˆˆ");
