@@ -5,10 +5,16 @@ const { Noir } = require("@noir-lang/noir_js");
 const path = require("path");
 const fs = require("fs");
 
-const CIRCUITS = {
-  semaphore: JSON.parse(fs.readFileSync("./semaphore/target/semaphore.json")),
-  join_semaphore_proofs: JSON.parse(fs.readFileSync("./join_semaphore_proofs/target/join_semaphore_proofs.json")),
-};
+function compileCircuit(pathToCircuit) {
+  console.log(`Compiling circuit at: ${pathToCircuit}`);
+  const result = spawnSync("nargo", ["compile"], {
+    cwd: pathToCircuit,
+    stdio: "inherit",
+  });
+  if (result.status !== 0) {
+    throw new Error(`Failed to compile circuit at ${pathToCircuit}`);
+  }
+}
 
 function runBB(argsArray) {
   console.log(`Running: bb ${argsArray.join(" ")}`);
@@ -19,6 +25,14 @@ function runBB(argsArray) {
 }
 
 async function prove_UltraHonk_CLI() {
+  compileCircuit("./semaphore");
+  compileCircuit("./join_semaphore_proofs");
+
+  const CIRCUITS = {
+    semaphore: JSON.parse(fs.readFileSync("./semaphore/target/semaphore.json")),
+    join_semaphore_proofs: JSON.parse(fs.readFileSync("./join_semaphore_proofs/target/join_semaphore_proofs.json")),
+  };
+  
   const tmpDir = "./tmp_cli";
   mkdirSync(tmpDir, { recursive: true });
 

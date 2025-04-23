@@ -1,0 +1,6 @@
+[package]
+name = "join_aggregated_proofs"
+type = "bin"
+authors = [""]
+
+[dependencies]

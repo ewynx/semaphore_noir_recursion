@@ -21,32 +21,39 @@ The difference for the proof types is the number of public inputs, which is why 
 
 ## Current state
 
-For now, the repo only contains one aggreation circuit that verifies 2 Semaphore proofs.
+We can aggregate 2 Semaphore proofs and 4 Semaphore proofs. The are scripts for both cases. There is also a manual walk through for aggregating 2 Semaphore proogs. 
 
-These are the steps:
-1. Generate Semaphore proof 1
-2. Generate Semaphore proof 2
-3. Generate Aggregation proof using the data from step 1 & 2
-4. Verify Aggregation proof
+The scripts work using `bb cli`; it doesn't work using `bb.js`. This is probably due to wasm memory limit since we are dealing with a large circuit ([reference](https://discord.com/channels/1113924620781883405/1209885496256503888/1309181119559893103) to Discord comment about this). More details about the error below. 
 
-This flow works using `bb cli`; it doesn't work using `bb.js`. This is probably due to wasm memory limit since we are dealing with a large circuit ([reference](https://discord.com/channels/1113924620781883405/1209885496256503888/1309181119559893103) to Discord comment about this). More details about the error below. 
+## Run scripts that use `bb cli`
 
-You can either follow the manual steps below or run the entire process using the provided script.
-
-## Run the full flow with `bb cli`
-
-To skip the manual steps, you can run the full proof generation and aggregation flow using the following script:
+Aggregate 4 Semaphore proofs. This basically happens in the following structure:
 
 ```bash
-node prove_bb_cli.js
+        ROOT CIRCUIT
+        /           \
+    JOIN            JOIN
+    /   \          /    \
+  S1    S2        S3    S4
 ```
-This script:
+1. Generate the 4 Semaphore proofs
+2. Aggregate them per 2 into a "Joined" proof
+3. Create a final "Root" proof that verifies the Joined proofs
+4. Verify the "Root" proof
 
-1. Generates two Semaphore proofs (depth 2 and depth 10) for hardcoded testdata
-2. Aggregates them using the join_semaphore_proofs circuit
-3. Verifies the final aggregated proof
+Note that this uses 3 different circuits. 
 
-## Manual steps with `nargo` and `bb`
+```bash
+node aggegrate_4_proofs.js
+```
+
+You can also aggregate 2 Semaphore proofs into a Joined proof and verify it. (Note that this uses 2 different circuits.) Run:
+
+```bash
+node aggegrate_2_proofs.js
+```
+
+## Aggregate 2 proofs: Manual steps with `nargo` and `bb`
 Versions: `bb 0.82.2` and `nargo 1.0.0-beta.3`.
 
 These steps detail exactly how to generate 2 Semaphore proofs and then generate an aggregation proof. The `semaphore` folder contains the [Semaphore Noir circuit,](https://github.com/hashcloak/semaphore-noir/blob/noir-support/packages/circuits-noir/src/main.nr) as well as 2 filled out `Prover.toml`s with vaid testdata. 
@@ -90,15 +97,15 @@ cd join_semaphore_proofs
 mkdir proof
 nargo execute
 
-bb prove -v -b "./target/join_semaphore_proofs.json" -w "./target/join_semaphore_proofs.gz" -o ./proof --recursive
+bb prove -v -b "./target/join_semaphore_proofs.json" -w "./target/join_semaphore_proofs.gz" -o ./proof  --output_format bytes_and_fields --recursive
 bb write_vk -v -b "./target/join_semaphore_proofs.json" -o ./proof --honk_recursion 1
 bb verify -k ./proof/vk -p ./proof/proof
 # Proof verified successfully
 ```
 
-## JavaScript
+## `bb.js` limitation
 
-Running the above in the javascript script `prove.js` gives the following error:
+If we replace the `bb cli` calls with `bb.js` functionality in `aggegrate_2_proofs.js` it gives the following error:
 ```
 node prove.js
 prove: 7.810s
