@@ -78,8 +78,6 @@ async function prove_UltraHonk_CLI() {
     "--honk_recursion", "1",
     "--recursive",
     "--init_kzg_accumulator",
-    "--oracle_hash",
-    "keccak"    
   ]);
 
   runBB([
@@ -90,8 +88,6 @@ async function prove_UltraHonk_CLI() {
     "--output_format", "bytes_and_fields",
     "--honk_recursion", "1",
     "--init_kzg_accumulator",
-    "--oracle_hash",
-    "keccak"
   ]);
 
   // Extra check in between
@@ -100,8 +96,6 @@ async function prove_UltraHonk_CLI() {
     "--scheme", "ultra_honk",
     "-k", `${out1}/vk`,
     "-p", `${out1}/proof`,
-    "--oracle_hash",
-    "keccak"
   ]);
 
   const proofFields1 = JSON.parse(readFileSync(`${out1}/proof_fields.json`));
@@ -125,8 +119,6 @@ async function prove_UltraHonk_CLI() {
     "--honk_recursion", "1",
     "--recursive",
     "--init_kzg_accumulator",
-    "--oracle_hash",
-    "keccak"
   ]);
 
   // Extra check in between
@@ -135,8 +127,6 @@ async function prove_UltraHonk_CLI() {
     "--scheme", "ultra_honk",
     "-k", `${out1}/vk`,
     "-p", `${out2}/proof`,
-    "--oracle_hash",
-    "keccak"
   ]);
 
   const proofFields2 = JSON.parse(readFileSync(`${out2}/proof_fields.json`));
