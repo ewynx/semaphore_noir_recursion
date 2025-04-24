@@ -21,11 +21,13 @@ The difference for the proof types is the number of public inputs, which is why 
 
 ## Current state
 
-We can aggregate 2 Semaphore proofs and 4 Semaphore proofs. The are scripts for both cases. There is also a manual walk through for aggregating 2 Semaphore proogs. 
+We can aggregate 2, 4 and 8 Semaphore proofs in different scripts. There is also a manual walk through for aggregating 2 Semaphore proogs. 
 
 The scripts work using `bb cli`; it doesn't work using `bb.js`. This is probably due to wasm memory limit since we are dealing with a large circuit ([reference](https://discord.com/channels/1113924620781883405/1209885496256503888/1309181119559893103) to Discord comment about this). More details about the error below. 
 
 ## Run scripts that use `bb cli`
+
+### Aggregate 4 proofs
 
 Aggregate 4 Semaphore proofs. This basically happens in the following structure:
 
@@ -46,12 +48,45 @@ Note that this uses 3 different circuits.
 ```bash
 node aggegrate_4_proofs.js
 ```
-
+### Aggregate 2 proofs
 You can also aggregate 2 Semaphore proofs into a Joined proof and verify it. (Note that this uses 2 different circuits.) Run:
 
 ```bash
 node aggegrate_2_proofs.js
 ```
+
+### Aggregate 8 proofs & verify on-chain
+
+Aggregate 8 Semaphore proofs in the following way:
+```
+                       AGG CIRCUIT
+                    /               \
+                  /                   \
+          AGG CIRCUIT               AGG CIRCUIT
+        /           \             /              \
+    JOIN            JOIN        JOIN            JOIN
+    /   \          /    \       /   \          /    \
+  S1    S2        S3    S4     S1   S3        S2    S4
+```
+(Note that we use each test proof twice, but in different compositions.)
+
+To generate all the proofs, as well as the Solidity verifer run:
+```bash
+node aggegrate_8_proofs.js
+```
+
+To extract the correct input data for the contract (from the proof) run:
+```bash
+node get_contract_input.js
+```
+
+You can find the contract in `tmp_cli/final/Verifier.sol`. (Note that for deployment in Remix there are instruction steps [here](https://noir-lang.org/docs/how_to/how-to-solidity-verifier/#step-3---deploying), and you need to turn on optimization.)
+
+You can find the public inputs in `tmp_cli/final/public_inputs.json` and the proof bytes in `tmp_cli/final/proof_clean.hex`. 
+
+This was tested (positively) with:
+- `bb v0.82.2`
+- `nargo 1.0.0-beta.3`
 
 ## Aggregate 2 proofs: Manual steps with `nargo` and `bb`
 Versions: `bb 0.82.2` and `nargo 1.0.0-beta.3`.
